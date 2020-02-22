@@ -1,11 +1,40 @@
 #include <iostream>
 #include <stdio.h>
+#include <string>
+//#include <string.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 //Window Dimensions
 const GLint WIDTH{ 800 }, HEIGHT{ 600 };
+
+GLuint VAO, VBO, shader;
+
+void CreateTriangle()
+{
+	GLfloat vertices[] = {
+		-1.0f, -1.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f,
+		 0.0f, 1.0f, 0.0f
+	};
+
+	// create VAO variable to store the vertex info
+	// 1 stands for the count of variables we are creating; it can be more than one
+	glGenVertexArrays(1, &VAO);			// creating a vertex array generate VAO ID
+	glBindVertexArray(VAO);				// Bind VAO with that ID
+
+	glGenBuffers(1, &VBO);				// generate VBO ID
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);	// bind VBO with ID; now you are working on the chosen VAO
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer( GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+}
 
 
 int main() {
@@ -16,7 +45,7 @@ int main() {
 		printf("GLFW Initialization failed!!!...");
 		//std::cout << "GLFW Initialization failed!!!..\n";
 		glfwTerminate();
-		return 1;
+		return 1; 
 	}
 
 	// Setup GLFW window properties
