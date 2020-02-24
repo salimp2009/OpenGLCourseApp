@@ -19,7 +19,7 @@ void CreateTriangle()
 		 0.0f, 1.0f, 0.0f
 	};
 
-	// trying to sync git
+	// trying to sync git again
 	// create VAO variable to store the vertex info
 	// 1 stands for the count of variables we are creating; it can be more than one
 	glGenVertexArrays(1, &VAO);			// creating a vertex array generate VAO ID
