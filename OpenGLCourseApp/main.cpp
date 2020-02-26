@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdio.h>
-#include <string>
-//#include <string.h>
+#include <string.h>
+//#include <string>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -10,6 +10,42 @@
 const GLint WIDTH{ 800 }, HEIGHT{ 600 };
 
 GLuint VAO, VBO, shader;
+
+// creating a vertex and fragment shader; typically done in an external file (this will be removed to another file)
+// vertex data will be passed into shader where we can move them around if we want to before passing to fragment shader
+
+// Vertex Shader;
+/* version 330 is the version of GLSL shader language; different from OpenGl version
+// location=0 identifies where the glVertexAttribPointer data starts
+// vec4 is the output data to be used in fragment shader
+// values are x,y,z of position and an extra value 1 is passed to align with matrice format
+// fragment shader where the data can be modified to create visual effects such as lava..etc
+// 0.4 * pos.x is just to demonstrate that we can modify the position of the object in vertex shader as well
+// we modified only x & y ; z is how the object from the camera we only want to object to modified on x-y plane for this demo
+*/
+static const char* vShader = "								\n\
+#version 330												\n\
+															\n\
+layout (location = 0) in vec3 pos;							\n\
+void main()													\n\
+{															\n\
+	gl_Position=vec4( 0.4*pos.x, 0.4*pos.y, pos.z, 1.0);	\n\
+}";	
+
+// Fragment Shader
+/* Fragment Shader has only one color output of the pixels
+// out	vec4 colour; out specifier is not required since there is only one output
+// colour=vec4(1.0f, 0.0, 0.0, 1.0);  // RGB values; creating a red triangle 
+*/
+static const char* fShader = "								\n\
+#version 330												\n\
+															\n\
+out	vec4 colour;											\n\
+															\n\
+void main()													\n\
+{															\n\
+	colour=vec4(1.0f, 0.0, 0.0, 1.0);						\n\
+}";
 
 void CreateTriangle()
 {
@@ -22,18 +58,103 @@ void CreateTriangle()
 	// trying to sync git again
 	// create VAO variable to store the vertex info
 	// 1 stands for the count of variables we are creating; it can be more than one
-	glGenVertexArrays(1, &VAO);			// creating a vertex array generate VAO ID
-	glBindVertexArray(VAO);				// Bind VAO with that ID
+	glGenVertexArrays(1, &VAO);			// creating a vertex array buffer and generate ID for it; that ID will be stored
+										// in variable VAO ID ; value 1 indicates we are creating 1 array the number of buffers
+	glBindVertexArray(VAO);				// Any Opengl functions or vertex buffer objects will be binded to that ID in VAO  until it is unbinded
 
-	glGenBuffers(1, &VBO);				// generate VBO ID
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);	// bind VBO with ID; now you are working on the chosen VAO
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),vertices, GL_STATIC_DRAW);
+	glGenBuffers(1, &VBO);				// Create 1 buffer object and generate ID and store in VBO
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);	// bind the VBO to a target; it has multiple target that can be binded
+										// we are telling VBO to bind to an Array Buffer which we created above 
+										// and pass ID of that buffer inside VBO 
+	
+	// Connect buffer object to the vertex array
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),vertices, GL_STATIC_DRAW);	// we are telling we are using an Array Buffer
+																				// then pass the size of data; we pass the size of the array named matrices 
+																				// or we could have used sizeof(float)*number elements 
+																				// next we pass the the data as a pointer which we use the array name
+																				// next we identify whether we will change any of those data or not; 
+																				// GL_STATIC_DRAW means no change later; GL_DYNAMIC draw means there will be change  
+	// creating Vertext Attribute Pointer that will be used in the shader
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);						// first value is the location to start store the data in shader
+																				// second value is number of each data; x,y,z so it is 3 and second value is the type of data(Float here)
+																				// third value ; normalize the values or not;
+																				// fourth value is stride; if we position and color info and want to pass position only then we specify how many data to pass
+																				// fifth is offset where we want the data to start typically 0 but if you want to start from 2nd raw then we could pass 1			
+	glEnableVertexAttribArray(0);												// the value is the same value above first value
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer( GL_ARRAY_BUFFER, 0);
+	// Unbind the Buffer from VBO and VAO so we can pass others if needed
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+}
+
+// function to be filled later
+void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
+{
+	// add code
+	GLuint theShader = glCreateShader(shaderType);				// will create an empty shader(fragment or fragment) and pass the ID
+
+	// required variable format for OpenGL glShaderSource() function
+	const GLchar* theCode[1];
+	theCode[0] = shaderCode;
+
+	GLint codeLength[1];
+	codeLength[0] = strlen(shaderCode);		// strlen is C version of std::strlen() ; we included string.h C library
+
+	glShaderSource(theShader, 1, theCode, codeLength);
+	glCompileShader(theShader);
+
+	// Get any erros from shaders
+	// hard to debug
+	GLint result = 0;
+	GLchar elog[1024] = { 0 };
+
+	glGetProgramiv(theShader, GL_COMPILE_STATUS, &result);			// we pass the program and which info we want the which is status and store the status in result variable
+	if (!result)
+	{
+		glGetShaderInfoLog(theShader, sizeof(elog), NULL, elog);	// store the error info in the variable elog to debug if there is a problem in vertex and fragment shaders
+		printf("Error compiling the %d shader: %s \n", shaderType, elog);
+		return;
+	}
+	glAttachShader(theProgram, theShader);
+	return;
+}
+
+void CompileShaders()
+{
+	// create a program and give shader the ID; actual program sits on GPU
+	shader = glCreateProgram();			
+	if (!shader) {
+		printf("Error creating the shader program....\n");
+		return;
+	}
+
+	// add shaders to program; vShader and fShader that was created above
+	AddShader(shader, vShader, GL_VERTEX_SHADER);
+	AddShader(shader, fShader, GL_FRAGMENT_SHADER);
+
+	// Get any erros from shaders
+	// hard to debug
+	GLint result = 0;
+	GLchar elog[1024] = { 0 };
+
+	// create all executble on GPU
+	glLinkProgram(shader);
+	glGetProgramiv(shader, GL_LINK_STATUS, &result);			// we pass the program and which info we want the which is status and store the status in result variable
+	if (!result)
+	{
+		glGetProgramInfoLog(shader, sizeof(elog), NULL, elog);	// store the error info in the variable elog to debug if there is a problem in vertex and fragment shaders
+		printf("Error linking program: %s \n", elog);
+		return;
+	}
+
+	glValidateProgram(shader);										// check if the shader program is valid for Open GL
+	glGetProgramiv(shader, GL_VALIDATE_STATUS, &result);			// we pass the program and which info we want the which is status and store the status in result variable
+	if (!result)
+	{
+		glGetProgramInfoLog(shader, sizeof(elog), NULL, elog);		// store the error info in the variable elog to debug if there is a problem in vertex and fragment shaders
+		printf("Error validating program: %s \n", elog);
+		return;
+	}
 
 }
 
@@ -43,7 +164,6 @@ int main() {
 	if (!glfwInit())
 	{
 		printf("GLFW Initialization failed!!!...");
-		//std::cout << "GLFW Initialization failed!!!..\n";
 		glfwTerminate();
 		return 1; 
 	}
@@ -97,7 +217,8 @@ int main() {
 		glfwPollEvents();
 
 		// Clear window for a fresh one; RGB color and transparency, 1=opaque
-		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+		// changed the color from red to black because we are creating a red triangle and background needs to be different
+		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 		// Clear all the color
 		glClear(GL_COLOR_BUFFER_BIT);
 		
