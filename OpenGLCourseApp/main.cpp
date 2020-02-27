@@ -29,7 +29,7 @@ static const char* vShader = "								\n\
 layout (location = 0) in vec3 pos;							\n\
 void main()													\n\
 {															\n\
-	gl_Position=vec4( 0.4*pos.x, 0.4*pos.y, pos.z, 1.0);	\n\
+	gl_Position=vec4( pos.x, pos.y, pos.z, 1.0);	        \n\
 }";	
 
 // Fragment Shader
@@ -90,8 +90,8 @@ void CreateTriangle()
 // function to be filled later
 void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
 {
-	// add code
-	GLuint theShader = glCreateShader(shaderType);				// will create an empty shader(fragment or fragment) and pass the ID
+	// create an empty shader(fragment or fragment) and pass the ID
+	GLuint theShader = glCreateShader(shaderType);				
 
 	// required variable format for OpenGL glShaderSource() function
 	const GLchar* theCode[1];
@@ -100,6 +100,7 @@ void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
 	GLint codeLength[1];
 	codeLength[0] = strlen(shaderCode);		// strlen is C version of std::strlen() ; we included string.h C library
 
+	// Load the shader file into GL
 	glShaderSource(theShader, 1, theCode, codeLength);
 	glCompileShader(theShader);
 
@@ -108,7 +109,7 @@ void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
 	GLint result = 0;
 	GLchar elog[1024] = { 0 };
 
-	glGetProgramiv(theShader, GL_COMPILE_STATUS, &result);			// we pass the program and which info we want the which is status and store the status in result variable
+	glGetShaderiv(theShader, GL_COMPILE_STATUS, &result);			// we pass the program and which info we want the which is status and store the status in result variable
 	if (!result)
 	{
 		glGetShaderInfoLog(theShader, sizeof(elog), NULL, elog);	// store the error info in the variable elog to debug if there is a problem in vertex and fragment shaders
@@ -170,14 +171,13 @@ int main() {
 
 	// Setup GLFW window properties
 	// OpenGL version
-
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	// Core profile means no backward compatibility
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Allow forward cmpatibility
+	// Allow forward compatibility
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
 
 	GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "Test Window", NULL, NULL);
@@ -207,8 +207,12 @@ int main() {
 		return 1;
 	}
 
-	// setup viewport size
+	// Create & setup viewport size
 	glViewport(0, 0, bufferWidth, bufferHeight);
+
+	// Create the triangle and shaders
+	CreateTriangle();
+	CompileShaders();
 
 	// loop until windows closed
 	while (!glfwWindowShouldClose(mainWindow))
@@ -217,10 +221,29 @@ int main() {
 		glfwPollEvents();
 
 		// Clear window for a fresh one; RGB color and transparency, 1=opaque
-		// changed the color from red to black because we are creating a red triangle and background needs to be different
+		// changed the color from red to blue because we are creating a red triangle and background needs to be different
 		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 		// Clear all the color
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		// get the shader working
+		glUseProgram(shader);
+
+		// Assign the current VAO to be used in the shader
+		glBindVertexArray(VAO);
+
+		// Drawing the object; 
+		// first argument specifies the type of object; triangle, rectangle..
+		//that way OpenGL how it is going to use vertices
+		// second argument is the start of array position and
+		// third agument is the number data 3; x,y,z
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		// Unbind the VAO once we are done to bind another
+		glBindVertexArray(0);
+
+		// close the shader
+		glUseProgram(0);
 		
 		glfwSwapBuffers(mainWindow);
 	}
