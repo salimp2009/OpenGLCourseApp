@@ -16,10 +16,10 @@ GLuint VAO, VBO, shader, uniformXMove;
 
 // setting the values to move the triangle left and right along x-axis
 // by applying uniform value and transform matrix
-bool direction =true;  // moving right (positive x axis) if true, moving left if false
-float triOffset=0.0f;
-float triMaxOffset=0.7f;
-float triIncrement=0.0015f;
+bool direction{true};  // moving right (positive x axis) if true, moving left if false
+float triOffset{0.0f};
+float triMaxOffset{0.7f};
+float triIncrement{0.0015f};
 
 
 // creating a vertex and fragment shader; typically done in an external file (this will be removed to another file)
