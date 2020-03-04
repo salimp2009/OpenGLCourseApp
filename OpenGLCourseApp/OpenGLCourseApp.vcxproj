@@ -113,6 +113,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)/../../External_libs/GLEW/glew-2.1.0/lib/Release/x64;$(SolutionDir)/../../External_libs/GLFW64/glfw-3.3.2.bin.WIN64/lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>
+      </ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -153,6 +155,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)/../../External_libs/GLEW/glew-2.1.0/lib/Release/x64;$(SolutionDir)/../../External_libs/GLFW64/glfw-3.3.2.bin.WIN64/lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>
+      </ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

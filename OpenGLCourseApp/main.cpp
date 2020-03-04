@@ -1,6 +1,9 @@
+
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <cmath>
+#include <cstdlib>
 //#include <string>
 
 #include <GL/glew.h>
@@ -9,7 +12,15 @@
 //Window Dimensions
 const GLint WIDTH{ 800 }, HEIGHT{ 600 };
 
-GLuint VAO, VBO, shader;
+GLuint VAO, VBO, shader, uniformXMove;
+
+// setting the values to move the triangle left and right along x-axis
+// by applying uniform value and transform matrix
+bool direction =true;  // moving right (positive x axis) if true, moving left if false
+float triOffset=0.0f;
+float triMaxOffset=0.7f;
+float triIncrement=0.0015f;
+
 
 // creating a vertex and fragment shader; typically done in an external file (this will be removed to another file)
 // vertex data will be passed into shader where we can move them around if we want to before passing to fragment shader
@@ -27,9 +38,12 @@ static const char* vShader = "								\n\
 #version 330												\n\
 															\n\
 layout (location = 0) in vec3 pos;							\n\
+															\n\
+uniform float xMove;										\n\
+				 											\n\
 void main()													\n\
 {															\n\
-	gl_Position=vec4( pos.x, pos.y, pos.z, 1.0);	        \n\
+	gl_Position=vec4( 0.4*pos.x+xMove, 0.4*pos.y+xMove, pos.z, 1.0);	        \n\
 }";	
 
 // Fragment Shader
@@ -44,7 +58,7 @@ out	vec4 colour;											\n\
 															\n\
 void main()													\n\
 {															\n\
-	colour=vec4(1.0f, 0.0, 0.0, 1.0);						\n\
+	colour=vec4(1.0f, 0.0f, 0.0f, 1.0);						\n\
 }";
 
 void CreateTriangle()
@@ -141,6 +155,8 @@ void CompileShaders()
 	// create all executble on GPU
 	glLinkProgram(shader);
 	glGetProgramiv(shader, GL_LINK_STATUS, &result);			// we pass the program and which info we want the which is status and store the status in result variable
+	
+	// check for errors
 	if (!result)
 	{
 		glGetProgramInfoLog(shader, sizeof(elog), NULL, elog);	// store the error info in the variable elog to debug if there is a problem in vertex and fragment shaders
@@ -148,6 +164,7 @@ void CompileShaders()
 		return;
 	}
 
+	// validate & check for errors
 	glValidateProgram(shader);										// check if the shader program is valid for Open GL
 	glGetProgramiv(shader, GL_VALIDATE_STATUS, &result);			// we pass the program and which info we want the which is status and store the status in result variable
 	if (!result)
@@ -156,6 +173,8 @@ void CompileShaders()
 		printf("Error validating program: %s \n", elog);
 		return;
 	}
+	
+	uniformXMove = glGetUniformLocation(shader, "xMove");
 
 }
 
@@ -219,7 +238,19 @@ int main() {
 	{
 	// get + handle user input events
 		glfwPollEvents();
+		if (direction)
+		{
+			triOffset += triIncrement;
+		} 
+		else {
+			triOffset -= triIncrement;
+		}
 
+
+		if (std::abs(triOffset) >= triMaxOffset) {
+			direction = !direction;
+		}
+	
 		// Clear window for a fresh one; RGB color and transparency, 1=opaque
 		// changed the color from red to blue because we are creating a red triangle and background needs to be different
 		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
@@ -228,6 +259,8 @@ int main() {
 
 		// get the shader working
 		glUseProgram(shader);
+
+		glUniform1f(uniformXMove, triOffset);
 
 		// Assign the current VAO to be used in the shader
 		glBindVertexArray(VAO);
