@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/mat4x4.hpp>
 
 //#include <string>
 
@@ -268,8 +269,8 @@ int main() {
 		// get the shader working
 		glUseProgram(shader);
 
-		glm::mat4 model(1);
-		model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, glm::vec3(triOffset, 2*triOffset, 0.0f));
 
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
