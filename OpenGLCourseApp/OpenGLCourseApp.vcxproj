@@ -106,7 +106,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>false</EnableModules>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../../External_libs/GLEW/glew-2.1.0/include;$(SolutionDir)/../../External_libs/GLFW64/glfw-3.3.2.bin.WIN64/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../../External_libs/GLEW/glew-2.1.0/include;$(SolutionDir)/../../External_libs/GLFW64/glfw-3.3.2.bin.WIN64/include;$(SolutionDir)/../../External_libs/GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,7 +146,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../../External_libs/GLEW/glew-2.1.0/include;$(SolutionDir)/../../External_libs/GLFW64/glfw-3.3.2.bin.WIN64/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../../External_libs/GLEW/glew-2.1.0/include;$(SolutionDir)/../../External_libs/GLFW64/glfw-3.3.2.bin.WIN64/include;$(SolutionDir)/../../External_libs/GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

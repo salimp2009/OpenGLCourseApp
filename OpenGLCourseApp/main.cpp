@@ -4,15 +4,22 @@
 #include <string.h>
 #include <cmath>
 #include <cstdlib>
-//#include <string>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+//#include <string>
+
+
+
 //Window Dimensions
 const GLint WIDTH{ 800 }, HEIGHT{ 600 };
 
-GLuint VAO, VBO, shader, uniformXMove;
+GLuint VAO, VBO, shader, uniformModel;
 
 // setting the values to move the triangle left and right along x-axis
 // by applying uniform value and transform matrix
@@ -39,12 +46,13 @@ static const char* vShader = "								\n\
 															\n\
 layout (location = 0) in vec3 pos;							\n\
 															\n\
-uniform float xMove;										\n\
+uniform mat4 model;										    \n\
 				 											\n\
 void main()													\n\
 {															\n\
-	gl_Position=vec4( 0.4*pos.x+xMove, 0.4*pos.y+xMove, pos.z, 1.0);	        \n\
+	gl_Position=model * vec4(0.4*pos.x, 0.4*pos.y, pos.z, 1.0);	        \n\
 }";	
+
 
 // Fragment Shader
 /* Fragment Shader has only one color output of the pixels
@@ -174,7 +182,7 @@ void CompileShaders()
 		return;
 	}
 	
-	uniformXMove = glGetUniformLocation(shader, "xMove");
+	uniformModel = glGetUniformLocation(shader, "model");
 
 }
 
@@ -260,12 +268,15 @@ int main() {
 		// get the shader working
 		glUseProgram(shader);
 
-		glUniform1f(uniformXMove, triOffset);
+		glm::mat4 model(1);
+		model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		// Assign the current VAO to be used in the shader
 		glBindVertexArray(VAO);
 
-		// Drawing the object; 
+		// Drawing the object; ,
 		// first argument specifies the type of object; triangle, rectangle..
 		//that way OpenGL how it is going to use vertices
 		// second argument is the start of array position and
