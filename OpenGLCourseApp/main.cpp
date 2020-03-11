@@ -111,7 +111,6 @@ void CreateTriangle()
 	glBindVertexArray(0);
 }
 
-// function to be filled later
 void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
 {
 	// create an empty shader(fragment or fragment) and pass the ID
