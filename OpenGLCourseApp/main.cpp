@@ -19,6 +19,7 @@
 
 //Window Dimensions
 const GLint WIDTH{ 800 }, HEIGHT{ 600 };
+constexpr float toRadians = 3.14159265f / 180.0f;
 
 GLuint VAO, VBO, shader, uniformModel;
 
@@ -28,7 +29,7 @@ bool direction{true};  // moving right (positive x axis) if true, moving left if
 float triOffset{0.0f};
 float triMaxOffset{0.7f};
 float triIncrement{0.0015f};
-
+float currentAngle{ 0.0f };
 
 // creating a vertex and fragment shader; typically done in an external file (this will be removed to another file)
 // vertex data will be passed into shader where we can move them around if we want to before passing to fragment shader
@@ -121,7 +122,7 @@ void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
 	theCode[0] = shaderCode;
 
 	GLint codeLength[1];
-	codeLength[0] = strlen(shaderCode);		// strlen is C version of std::strlen() ; we included string.h C library
+	codeLength[0] = static_cast<GLint>(strlen(shaderCode));		// strlen is C version of std::strlen() ; we included string.h C library
 
 	// Load the shader file into GL
 	glShaderSource(theShader, 1, theCode, codeLength);
@@ -259,6 +260,11 @@ int main() {
 		if (std::abs(triOffset) >= triMaxOffset) {
 			direction = !direction;
 		}
+
+		currentAngle += 0.1f;
+		if (currentAngle >= 360.0f) {
+			currentAngle -= 360.0f;
+		}
 	
 		// Clear window for a fresh one; RGB color and transparency, 1=opaque
 		// changed the color from red to blue because we are creating a red triangle and background needs to be different
@@ -270,7 +276,9 @@ int main() {
 		glUseProgram(shader);
 
 		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(triOffset, 2*triOffset, 0.0f));
+		model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
+		model = glm::rotate(model, currentAngle*toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
