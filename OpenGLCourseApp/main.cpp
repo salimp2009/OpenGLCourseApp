@@ -21,7 +21,7 @@
 const GLint WIDTH{ 800 }, HEIGHT{ 600 };
 constexpr float toRadians = 3.14159265f / 180.0f;
 
-GLuint VAO, VBO, shader, uniformModel;
+GLuint VAO, VBO, IBO, shader, uniformModel;
 
 // setting the values to move the triangle left and right along x-axis
 // by applying uniform value and transform matrix
@@ -52,12 +52,13 @@ static const char* vShader = "								\n\
 #version 330												\n\
 															\n\
 layout (location = 0) in vec3 pos;							\n\
-															\n\
+out vec4 vCol;											    \n\
 uniform mat4 model;										    \n\
 				 											\n\
 void main()													\n\
 {															\n\
 	gl_Position=model * vec4(pos, 1.0);						\n\
+	vCol=vec4(clamp(pos, 0.0f, 1.0f), 1.0f);                                                             \n\
 }";	
 
 
@@ -68,18 +69,26 @@ void main()													\n\
 */
 static const char* fShader = "								\n\
 #version 330												\n\
-															\n\
+in vec4 vCol;											    \n\
 out	vec4 colour;											\n\
 															\n\
 void main()													\n\
 {															\n\
-	colour=vec4(1.0f, 0.0f, 0.0f, 1.0);						\n\
+	colour=vCol;											\n\
 }";
 
 void CreateTriangle()
 {
+	unsigned int indices[] = {
+		0, 3, 1,
+		1, 3, 2,
+		2, 3, 0,
+		0, 1, 2
+	};
+
 	GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f,
+		 0.0f, -1.0f, 1.0f,
 		 1.0f, -1.0f, 0.0f,
 		 0.0f, 1.0f, 0.0f
 	};
@@ -91,6 +100,10 @@ void CreateTriangle()
 										// in variable VAO ID ; value 1 indicates we are creating 1 array the number of buffers
 	glBindVertexArray(VAO);				// Any Opengl functions or vertex buffer objects will be binded to that ID in VAO  until it is unbinded
 
+	glGenBuffers(1, &IBO);						// Creeating a buffer element indices to draw a complex object using index number of coordinates
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO); // Bind the elemnt array buffer to the given index and store in IBO variable  
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
+	
 	glGenBuffers(1, &VBO);				// Create 1 buffer object and generate ID and store in VBO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);	// bind the VBO to a target; it has multiple target that can be binded
 										// we are telling VBO to bind to an Array Buffer which we created above 
@@ -114,6 +127,7 @@ void CreateTriangle()
 	// Unbind the Buffer from VBO and VAO so we can pass others if needed
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
@@ -240,6 +254,8 @@ int main() {
 		return 1;
 	}
 
+	glEnable(GL_DEPTH_TEST);
+
 	// Create & setup viewport size
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
@@ -285,24 +301,26 @@ int main() {
 		// changed the color from red to blue because we are creating a red triangle and background needs to be different
 		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 		// Clear all the color
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// get the shader working
 		glUseProgram(shader);
 
 		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
-		model = glm::rotate(model, currentAngle*toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
-		//model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(curSize, curSize, 1.0f));
+		//model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
+		model = glm::rotate(model, currentAngle*toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, glm::radians(currentAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		// Assign the current VAO to be used in the shader
 		glBindVertexArray(VAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
 		// Drawing the object; ,
 		// first argument specifies the type of object; triangle, rectangle..
-		//that way OpenGL how it is going to use vertices
+		//that way OpenGL know how it is going to use vertices
 		// second argument is the start of array position and
 		// third agument is the number data 3; x,y,z
 		glDrawArrays(GL_TRIANGLES, 0, 3);
