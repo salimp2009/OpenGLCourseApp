@@ -4,6 +4,8 @@
 #include <string.h>
 #include <cmath>
 #include <cstdlib>
+#include <vector>
+#include <memory>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -13,6 +15,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 
+#include "Mesh.h"
 //#include <string>
 
 
@@ -21,7 +24,10 @@
 const GLint WIDTH{ 800 }, HEIGHT{ 600 };
 constexpr float toRadians = 3.14159265f / 180.0f;
 
-GLuint VAO, VBO, IBO, shader, uniformModel, uniformProjection;
+std::vector<Mesh*>meshList; 
+std::vector<std::unique_ptr<Mesh>>meshList2;
+
+GLuint shader, uniformModel, uniformProjection;
 
 // setting the values to move the triangle left and right along x-axis
 // by applying uniform value and transform matrix
@@ -94,41 +100,12 @@ void CreateTriangle()
 		 0.0f, 1.0f, 0.0f
 	};
 
-	// trying to sync git again
-	// create VAO variable to store the vertex info
-	// 1 stands for the count of variables we are creating; it can be more than one
-	glGenVertexArrays(1, &VAO);			// creating a vertex array buffer and generate ID for it; that ID will be stored
-										// in variable VAO ID ; value 1 indicates we are creating 1 array the number of buffers
-	glBindVertexArray(VAO);				// Any Opengl functions or vertex buffer objects will be binded to that ID in VAO  until it is unbinded
+	Mesh *obj1 = new Mesh();
+	obj1->CreateMesh(vertices, indices, 12, 12);
+	meshList.push_back(obj1);
+	meshList2.emplace_back(std::make_unique<Mesh>());
+	meshList2[0]->CreateMesh(vertices, indices, 12, 12);
 
-	glGenBuffers(1, &IBO);						// Creeating a buffer element indices to draw a complex object using index number of coordinates
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO); // Bind the elemnt array buffer to the given index and store in IBO variable  
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
-	
-	glGenBuffers(1, &VBO);				// Create 1 buffer object and generate ID and store in VBO
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);	// bind the VBO to a target; it has multiple target that can be binded
-										// we are telling VBO to bind to an Array Buffer which we created above 
-										// and pass ID of that buffer inside VBO 
-	
-	// Connect buffer object to the vertex array
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),vertices, GL_STATIC_DRAW);	// we are telling we are using an Array Buffer
-																				// then pass the size of data; we pass the size of the array named matrices 
-																				// or we could have used sizeof(float)*number elements 
-																				// next we pass the the data as a pointer which we use the array name
-																				// next we identify whether we will change any of those data or not; 
-																				// GL_STATIC_DRAW means no change later; GL_DYNAMIC draw means there will be change  
-	// creating Vertext Attribute Pointer that will be used in the shader
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);						// first value is the location to start store the data in shader
-																				// second value is number of each data; x,y,z so it is 3 and second value is the type of data(Float here)
-																				// third value ; normalize the values or not;
-																				// fourth value is stride; if we position and color info and want to pass position only then we specify how many data to pass
-																				// fifth is offset where we want the data to start typically 0 but if you want to start from 2nd raw then we could pass 1			
-	glEnableVertexAttribArray(0);												// the value is the same value above first value
-
-	// Unbind the Buffer from VBO and VAO so we can pass others if needed
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
@@ -318,20 +295,8 @@ int main() {
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
-		// Assign the current VAO to be used in the shader
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-
-		// Drawing the object; ,
-		// first argument specifies the type of object; triangle, rectangle..
-		//that way OpenGL know how it is going to use vertices
-		// second argument is the start of array position and
-		// third agument is the number data 3; x,y,z
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		// Unbind the VAO once we are done to bind another
-		glBindVertexArray(0);
+		//meshList[0]->RenderMesh();
+		meshList2[0]->RenderMesh();
 
 		// close the shader
 		glUseProgram(0);
