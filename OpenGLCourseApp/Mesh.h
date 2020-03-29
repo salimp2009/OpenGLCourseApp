@@ -11,10 +11,7 @@ public:
 	void CreateMesh(GLfloat *vertices, unsigned int *indices, unsigned int numOfVertices, unsigned int numOfIndices); 
 	void RenderMesh();		// Draw the mesh; 
 	void ClearMesh();		// Delete from the buffer
-	 
-
 	~Mesh();
-
 private:
 	GLuint VAO, VBO, IBO;
 	GLsizei indexCount;			// Indexcount is the number indices we pass when we create an object

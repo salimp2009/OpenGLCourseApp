@@ -103,8 +103,12 @@ void CreateTriangle()
 	Mesh *obj1 = new Mesh();
 	obj1->CreateMesh(vertices, indices, 12, 12);
 	meshList.push_back(obj1);
+	
 	meshList2.emplace_back(std::make_unique<Mesh>());
 	meshList2[0]->CreateMesh(vertices, indices, 12, 12);
+
+	meshList2.emplace_back(std::make_unique<Mesh>());
+	meshList2[1]->CreateMesh(vertices, indices, 12, 12);
 
 }
 
@@ -288,15 +292,29 @@ int main() {
 
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f));
-		model = glm::rotate(model, currentAngle*toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, currentAngle*toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::rotate(model, glm::radians(currentAngle), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 		
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
+		// uses raw pointer; in the original class
 		//meshList[0]->RenderMesh();
+		
+		// using std::unique_ptr
 		meshList2[0]->RenderMesh();
+
+		// creating a second object; reset the model to apply different translate and scale to position
+		// these will be later handled by an object class
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(-triOffset, 0.0f, -2.0f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		meshList2[1]->RenderMesh();
+
+
+
 
 		// close the shader
 		glUseProgram(0);
