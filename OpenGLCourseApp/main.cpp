@@ -100,9 +100,10 @@ void CreateTriangle()
 		 0.0f, 1.0f, 0.0f
 	};
 
-	Mesh *obj1 = new Mesh();
-	obj1->CreateMesh(vertices, indices, 12, 12);
-	meshList.push_back(obj1);
+	// Original class method; not used ; used unique_ptr instead
+	//Mesh *obj1 = new Mesh();
+	//obj1->CreateMesh(vertices, indices, 12, 12);
+	//meshList.push_back(obj1);
 	
 	meshList2.emplace_back(std::make_unique<Mesh>());
 	meshList2[0]->CreateMesh(vertices, indices, 12, 12);
