@@ -2,6 +2,7 @@
 #ifndef MESH_H_
 #define MESH_H_
 #include <GL/glew.h>
+
 // #include <cstddef>		// needed for std::size_t if needed
 
 class Mesh
