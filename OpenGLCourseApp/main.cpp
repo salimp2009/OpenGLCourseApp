@@ -54,19 +54,7 @@ float minSize{0.1f};
 // 0.4 * pos.x is just to demonstrate that we can modify the position of the object in vertex shader as well
 // we modified only x & y ; z is how the object from the camera we only want to object to modified on x-y plane for this demo
 */
-static const char* vShader = "								\n\
-#version 330												\n\
-															\n\
-layout (location = 0) in vec3 pos;							\n\
-out vec4 vCol;											    \n\
-uniform mat4 model;										    \n\
-uniform mat4 projection;									\n\
-				 											\n\
-void main()													\n\
-{															\n\
-	gl_Position=projection* model * vec4(pos, 1.0);			\n\
-	vCol=vec4(clamp(pos, 0.0f, 1.0f), 1.0f);                                                             \n\
-}";	
+static const char* vShader = "Shaders/shader.vert";
 
 
 // Fragment Shader
@@ -74,15 +62,7 @@ void main()													\n\
 // out	vec4 colour; out specifier is not required since there is only one output
 // colour=vec4(1.0f, 0.0, 0.0, 1.0);  // RGB values; creating a red triangle 
 */
-static const char* fShader = "								\n\
-#version 330												\n\
-in vec4 vCol;											    \n\
-out	vec4 colour;											\n\
-															\n\
-void main()													\n\
-{															\n\
-	colour=vCol;											\n\
-}";
+static const char* fShader = "Shaders/shader.frag";
 
 void CreateObjects()
 {
@@ -115,14 +95,16 @@ void CreateObjects()
 
 void CreateShaders()
 {
-	Shader* shader1 = new Shader();
-	shader1->CreateFromString(vShader, fShader);
-	shaderList.push_back(*shader1);
+	/*Shader* shader1 = new Shader();
+	shader1->CreateFromFiles(vShader, fShader);
+	shaderList.push_back(*shader1);*/
+	shaderList.emplace_back();
+	shaderList[0].CreateFromFiles(vShader, fShader);
 
 	//std::shared_ptr<Shader> shader1(new Shader());
-	////std::shared_ptr<Shader> shader1 = std::make_shared<Shader>();
-	//shader1->CreateFromString(vShader, fShader);
-	//shaderList.push_back(*(shader1.get()));
+	/*std::shared_ptr<Shader> shader1 = std::make_shared<Shader>();
+	shader1->CreateFromFiles(vShader, fShader);
+	shaderList.push_back(*shader1);*/
 }
 
 int main() {

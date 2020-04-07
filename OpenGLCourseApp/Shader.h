@@ -17,6 +17,10 @@ public:
 	// for testing purposes; later shader and fragment code will be read from seperate file
 	void CreateFromString(const char* vertexCode, const char* fragmentCode);
 
+	void CreateFromFiles(const char* vertexLocation, const char* fragmentLocation);
+
+	std::string ReadFile(const char* fileLocation);
+
 	GLuint GetProjectionLocation();
 	GLuint GetModelLocation();
 	void UseShader();
