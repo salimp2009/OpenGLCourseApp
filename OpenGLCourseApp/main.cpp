@@ -15,15 +15,19 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 
+#include "MyWindow.h"
 #include "Mesh.h"
 #include "Shader.h"
 //#include <string>
 
 //Window Dimensions
-const GLint WIDTH{ 800 }, HEIGHT{ 600 };
+constexpr GLint WIDTH{ 800 }, HEIGHT{ 600 };
 constexpr float toRadians = 3.14159265f / 180.0f;
 
-std::vector<Mesh*>meshList; 
+
+MyWindow mainWindow;
+
+//std::vector<Mesh*>meshList;					// Not used; Original course method; used unique_ptr
 std::vector<std::unique_ptr<Mesh>>meshList2;
 std::vector<Shader> shaderList;
 
@@ -31,16 +35,6 @@ std::vector<Shader> shaderList;
 
 // setting the values to move the triangle left and right along x-axis
 // by applying uniform value and transform matrix
-bool direction{true};  // moving right (positive x axis) if true, moving left if false
-float triOffset{0.0f};
-float triMaxOffset{0.7f};
-float triIncrement{0.0015f};
-float currentAngle{ 0.0f };
-
-bool sizeDirection{true};
-float curSize{0.4f};
-float maxSize{0.8f};
-float minSize{0.1f};
 
 // creating a vertex and fragment shader; typically done in an external file (this will be removed to another file)
 // vertex data will be passed into shader where we can move them around if we want to before passing to fragment shader
@@ -95,70 +89,23 @@ void CreateObjects()
 
 void CreateShaders()
 {
-	/*Shader* shader1 = new Shader();
-	shader1->CreateFromFiles(vShader, fShader);
-	shaderList.push_back(*shader1);*/
+	//Shader* shader1 = new Shader();
+	//shader1->CreateFromFiles(vShader, fShader);
+	//shaderList.push_back(*shader1);
+	
 	shaderList.emplace_back();
 	shaderList[0].CreateFromFiles(vShader, fShader);
 
 	//std::shared_ptr<Shader> shader1(new Shader());
-	/*std::shared_ptr<Shader> shader1 = std::make_shared<Shader>();
-	shader1->CreateFromFiles(vShader, fShader);
-	shaderList.push_back(*shader1);*/
+	//std::shared_ptr<Shader> shader1 = std::make_shared<Shader>();
+	//shader1->CreateFromFiles(vShader, fShader);
+	//shaderList.push_back(*shader1);
 }
 
 int main() {
 
-	//initialize GLFW
-	if (!glfwInit())
-	{
-		printf("GLFW Initialization failed!!!...");
-		glfwTerminate();
-		return 1; 
-	}
-
-	// Setup GLFW window properties
-	// OpenGL version
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
-	// Core profile means no backward compatibility
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	// Allow forward compatibility
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
-
-	GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "Test Window", NULL, NULL);
-	if (!mainWindow)
-	{
-		printf("GLFW Window creation failed!!!...");
-		//std::cout << "GLFW Window creation failed!!!...\n";
-		glfwTerminate();
-		return 1;
-	}
-	// Get Buffer size info
-	int bufferWidth{0}, bufferHeight{0};
-	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
-
-	// set the context for GLEW to use
-	glfwMakeContextCurrent(mainWindow);
-
-	// Allow modern extension features
-	glewExperimental = GL_TRUE;
-
-	// initialize Glew
-	if (glewInit()!=GLEW_OK)
-	{
-		printf("GLEW initialisation failed!!!...");
-		glfwDestroyWindow(mainWindow);
-		glfwTerminate();
-		return 1;
-	}
-
-	glEnable(GL_DEPTH_TEST);
-
-	// Create & setup viewport size
-	glViewport(0, 0, bufferWidth, bufferHeight);
+	mainWindow = MyWindow(800, 600);
+	mainWindow.Initialise();
 
 	// Create the triangle and shaders
 	CreateObjects();
@@ -167,42 +114,14 @@ int main() {
 	GLuint uniformProjection{0};
 	GLuint uniformModel{0};
 
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)bufferWidth/(GLfloat)bufferHeight, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), mainWindow.getBufferWidth()/mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
 	// loop until windows closed
-	while (!glfwWindowShouldClose(mainWindow))
+	while (!mainWindow.getShouldClose())
 	{
 	// get + handle user input events
 		glfwPollEvents();
-		if (direction)
-		{
-			triOffset += triIncrement;
-		} 
-		else {
-			triOffset -= triIncrement;
-		}
-
-
-		if (std::abs(triOffset) >= triMaxOffset) {
-			direction = !direction;
-		}
-
-		currentAngle += 0.1f;
-		if (currentAngle >= 360.0f) {
-			currentAngle -= 360.0f;
-		}
-
-		if (sizeDirection) 
-		{
-			curSize += 0.001f;
-		}
-		else {
-			curSize -= 0.001f;
-		}
-		if (curSize >= maxSize || curSize <= minSize) 
-		{
-			sizeDirection = !sizeDirection;
-		}
+		
 		// Clear window for a fresh one; RGB color and transparency, 1=opaque
 		// changed the color from red to blue because we are creating a red triangle and background needs to be different
 		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
@@ -215,9 +134,9 @@ int main() {
 		uniformProjection = shaderList[0].GetProjectionLocation();
 
 		glm::mat4 model(1.0f);
+		
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f));
-		//model = glm::rotate(model, currentAngle*toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::rotate(model, glm::radians(currentAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+		//model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 		
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -232,7 +151,7 @@ int main() {
 		// creating a second object; reset the model to apply different translate and scale to position
 		// these will be later handled by an object class
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-triOffset, 0.0f, -2.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		meshList2[1]->RenderMesh();
@@ -240,7 +159,7 @@ int main() {
 		// close the shader
 		glUseProgram(0);
 		
-		glfwSwapBuffers(mainWindow);
+		mainWindow.SwapBuffers();
 	}
 
 	return 0;
