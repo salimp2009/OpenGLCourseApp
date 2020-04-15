@@ -24,6 +24,17 @@ private:
 	GLFWwindow *mainWindow;
 	GLint width, height;
 	GLint bufferWidth, bufferHeight;
-};
+	
+	// input from keyboard, mouse to pass it GLFW for the camera movement
+	bool keys[1024];			//1024 is to cover all the ASCII code; use max_key
+								//when a key is pressed down GLFW will pick i tup and
+								//that number will refer to the index no in the keys array and value
+								//be set to TRUE and when the key is released when we lift off the key
+								// this is specific GLFW to do a call back and static is used to make it to specific to a class
+								
+	void createCallbacks();
+
+	static void handleKeys(GLFWwindow* window, int key, int code, int action, int mode); 						
+};							
 
 #endif // !_MY_WINDOW_H
