@@ -1,6 +1,7 @@
 #include "MyWindow.h"
 
-MyWindow::MyWindow() :mainWindow{ nullptr }, width{ 800 }, height{ 600 }, bufferHeight{ 0 }, bufferWidth{ 0 }, keys{ 0 } {}
+MyWindow::MyWindow() :mainWindow{ nullptr }, width{ 800 }, height{ 600 }, bufferHeight{ 0 }, bufferWidth{ 0 }, keys{ 0 }, 
+lastX{ 0.0f }, lastY{ 0.0f }, xChange{ 0.0f }, yChange{ 0.0f }, mouseFirstMoved{true} {}
 
 
 MyWindow::MyWindow(GLint windowWidth, GLint windowHeight) : mainWindow{ nullptr }, width{ windowWidth }, height{ windowHeight }, bufferHeight{ 0 }, bufferWidth{ 0 }, keys{0} {}
@@ -44,6 +45,9 @@ int MyWindow::Initialise()
 	// Handle key and mouse input
 	createCallbacks();
 
+	// the cursor will be disabled; it will not be visible but still control the values
+	// mostly used in games so you can your gun/actor instead of cursor :=)
+	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Allow modern extension features
 	glewExperimental = GL_TRUE;
@@ -69,7 +73,25 @@ int MyWindow::Initialise()
 void MyWindow::createCallbacks()
 {
 	glfwSetKeyCallback(mainWindow, handleKeys);
+	glfwSetCursorPosCallback(mainWindow, handleMouse);
 }
+
+// will be used the camera class
+GLfloat MyWindow::getXChange()
+{
+	GLfloat theChange = xChange;
+	xChange = 0.0f;			
+	return theChange;
+}
+
+GLfloat MyWindow::getYChange()
+{
+	GLfloat theChange = yChange;
+	yChange = 0.0f;
+	return theChange;
+}
+
+
 
 void MyWindow::handleKeys(GLFWwindow* window, int key, int code, int action, int mode) 
 {
@@ -94,7 +116,28 @@ void MyWindow::handleKeys(GLFWwindow* window, int key, int code, int action, int
 			printf("Released: %d\n", key);
 		}
 	}
-}																					
+}
+
+void MyWindow::handleMouse(GLFWwindow* window, double xPos, double yPos)
+{
+	MyWindow* theWindow = static_cast<MyWindow*>(glfwGetWindowUserPointer(window));
+
+	if (theWindow->mouseFirstMoved)
+	{
+		theWindow->lastX = xPos;
+		theWindow->lastY = yPos;
+		theWindow->mouseFirstMoved = false;
+	}
+
+	theWindow->xChange = xPos - theWindow->lastX;
+	theWindow->yChange = theWindow->lastY - yPos;
+
+	theWindow->lastX = xPos;
+	theWindow->lastY = yPos;
+
+	// used to check the mouse control is working; can be deleted
+	// printf("x:%.6f, y:%.6f\n",theWindow->xChange, theWindow->yChange);
+}
 
 MyWindow::~MyWindow() 
 {
