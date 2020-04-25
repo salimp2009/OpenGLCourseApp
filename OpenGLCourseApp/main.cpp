@@ -18,7 +18,8 @@
 #include "MyWindow.h"
 #include "Mesh.h"
 #include "Shader.h"
-//#include <string>
+#include "Camera.h"
+
 
 constexpr float toRadians = 3.14159265f / 180.0f;
 
@@ -28,6 +29,7 @@ MyWindow mainWindow;
 //std::vector<Mesh*>meshList;					// Not used; Original course method; used unique_ptr
 std::vector<std::unique_ptr<Mesh>>meshList2;
 std::vector<Shader> shaderList;
+Camera camera;
 
 // Vertex Shader;
 /* version 330 is the version of GLSL shader language; different from OpenGl version
@@ -100,6 +102,10 @@ int main() {
 	CreateObjects();
 	CreateShaders();
 
+	// Camera(glm::vec3 startPosition, glm::vec3 startUp, GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed);
+	camera = Camera(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f}, -90.0f, 0.0f, 0.01f, 1.0f);
+
+	GLuint uniformView{0};
 	GLuint uniformProjection{0};
 	GLuint uniformModel{0};
 
@@ -110,6 +116,8 @@ int main() {
 	{
 	// get + handle user input events
 		glfwPollEvents();
+
+		camera.keyControl(mainWindow.getKeys());
 		
 		// Clear window for a fresh one; RGB color and transparency, 1=opaque
 		// changed the color from red to blue because we are creating a red triangle and background needs to be different
@@ -121,15 +129,17 @@ int main() {
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
+		uniformView = shaderList[0].GetViewLocation();
 
 		glm::mat4 model(1.0f);
 		
-		model = glm::translate(model, glm::vec3(0.0f, -0.2f, -2.5f));
+		model = glm::translate(model, glm::vec3(0.0f, -0.0f, -2.5f));
 		//model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 		
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()) );
 
 		// uses raw pointer; in the original class
 		//meshList[0]->RenderMesh();

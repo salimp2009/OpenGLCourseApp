@@ -15,6 +15,7 @@ public:
 	MyWindow(GLint windowWidth, GLint windowHeight);
 	
 	int Initialise(); 
+
 	GLfloat getBufferWidth()  { return static_cast<GLfloat>(bufferWidth); }   // add const qualifier if OpenGl is OK
 	GLfloat getBufferHeight() { return  static_cast<GLfloat>(bufferHeight); }
 

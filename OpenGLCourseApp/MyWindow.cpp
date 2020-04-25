@@ -136,7 +136,7 @@ void MyWindow::handleMouse(GLFWwindow* window, double xPos, double yPos)
 	theWindow->lastY = yPos;
 
 	// used to check the mouse control is working; can be deleted
-	// printf("x:%.6f, y:%.6f\n",theWindow->xChange, theWindow->yChange);
+	 //printf("x:%.6f, y:%.6f\n",theWindow->xChange, theWindow->yChange);
 }
 
 MyWindow::~MyWindow() 
