@@ -31,6 +31,9 @@ std::vector<std::unique_ptr<Mesh>>meshList2;
 std::vector<Shader> shaderList;
 Camera camera;
 
+GLfloat deltaTime{0.0f};						// deltaTime is in seconds
+GLfloat lastTime{0.0f};
+
 // Vertex Shader;
 /* version 330 is the version of GLSL shader language; different from OpenGl version
 // location=0 identifies where the glVertexAttribPointer data starts
@@ -103,7 +106,7 @@ int main() {
 	CreateShaders();
 
 	// Camera(glm::vec3 startPosition, glm::vec3 startUp, GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed);
-	camera = Camera(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f}, -90.0f, 0.0f, 0.01f, 1.0f);
+	camera = Camera(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f}, -90.0f, 0.0f, 5.0f, 0.65f);
 
 	GLuint uniformView{0};
 	GLuint uniformProjection{0};
@@ -114,10 +117,15 @@ int main() {
 	// loop until windows closed
 	while (!mainWindow.getShouldClose())
 	{
+		GLfloat now = glfwGetTime();	// SDL version: SDL_GetPerformanceCounter; but not used here	
+		deltaTime = now - lastTime;		// calculate time difference between when the loop (rendering a frame ended) & current time; SLD Version; (now-lastTime)*1000/SDL_GetPerformanceFrequency()
+		lastTime = now;					// update lastTime to now ; deltaTime is in seconds
+
 	// get + handle user input events
 		glfwPollEvents();
 
-		camera.keyControl(mainWindow.getKeys());
+		camera.keyControl(mainWindow.getKeys(), deltaTime);
+		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 		
 		// Clear window for a fresh one; RGB color and transparency, 1=opaque
 		// changed the color from red to blue because we are creating a red triangle and background needs to be different
