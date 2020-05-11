@@ -1,5 +1,7 @@
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb_image.h"
 
-#include <iostream>
+
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
@@ -13,16 +15,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/mat4x4.hpp>
+#include <glm/mat4x4.hpp>					// not needed here either disable or remove !!!!!
 
 #include "MyWindow.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Texture.h"
 
 
 constexpr float toRadians = 3.14159265f / 180.0f;
-
 
 MyWindow mainWindow;
 
@@ -30,6 +32,9 @@ MyWindow mainWindow;
 std::vector<std::unique_ptr<Mesh>>meshList2;
 std::vector<Shader> shaderList;
 Camera camera;
+
+Texture brickTexture;							// typicall in mesh class in the Render function; will be cleanedup later
+Texture dirtTexture;
 
 GLfloat deltaTime{0.0f};						// deltaTime is in seconds
 GLfloat lastTime{0.0f};
@@ -63,10 +68,11 @@ void CreateObjects()
 	};
 
 	 GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f,
-		 0.0f, -1.0f, 1.0f,
-		 1.0f, -1.0f, 0.0f,
-		 0.0f, 1.0f, 0.0f
+		 //x	 y		z	  u		v			// u,v are the cordinate of the 2D Texture ; x,y,z are the coordiates of vertices
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,			// u,v coord bottom left
+		 0.0f, -1.0f, 1.0f, 0.5f, 0.0f,			// u,v coord bottom half on x-axis this is one in z-dimension
+		 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,		    // u,v coord bottom right
+		 0.0f, 1.0f, 0.0f,  0.5f, 1.0f			// u,v coord top middle since it is a triangle facing front
 	};
 
 	// Original class method; not used ; used unique_ptr instead
@@ -75,10 +81,10 @@ void CreateObjects()
 	//meshList.push_back(obj1);
 	
 	meshList2.emplace_back(std::make_unique<Mesh>());
-	meshList2[0]->CreateMesh(vertices, indices, 12, 12);
+	meshList2[0]->CreateMesh(vertices, indices, 20, 12);
 
 	meshList2.emplace_back(std::make_unique<Mesh>());
-	meshList2[1]->CreateMesh(vertices, indices, 12, 12);
+	meshList2[1]->CreateMesh(vertices, indices, 20, 12);
 }
 
 void CreateShaders()
@@ -106,7 +112,13 @@ int main() {
 	CreateShaders();
 
 	// Camera(glm::vec3 startPosition, glm::vec3 startUp, GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed);
-	camera = Camera(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f}, -90.0f, 0.0f, 5.0f, 0.65f);
+	camera = Camera(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f}, -90.0f, 0.0f, 5.0f, 0.15f);
+
+	// "Texture/brick.png";
+	brickTexture = Texture((char*)"Textures/brick.png");
+	brickTexture.LoadTexture();
+	dirtTexture = Texture((char*)"Textures/dirt.png");
+	dirtTexture.LoadTexture();
 
 	GLuint uniformView{0};
 	GLuint uniformProjection{0};
@@ -117,7 +129,7 @@ int main() {
 	// loop until windows closed
 	while (!mainWindow.getShouldClose())
 	{
-		GLfloat now = glfwGetTime();	// SDL version: SDL_GetPerformanceCounter; but not used here	
+		GLfloat now = static_cast<float>(glfwGetTime());	// SDL version: SDL_GetPerformanceCounter; but not used here	
 		deltaTime = now - lastTime;		// calculate time difference between when the loop (rendering a frame ended) & current time; SLD Version; (now-lastTime)*1000/SDL_GetPerformanceFrequency()
 		lastTime = now;					// update lastTime to now ; deltaTime is in seconds
 
@@ -148,12 +160,13 @@ int main() {
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()) );
-
+		brickTexture.UseTexture();
+		
 		// uses raw pointer; in the original class
 		//meshList[0]->RenderMesh();
-		
 		// using std::unique_ptr
 		meshList2[0]->RenderMesh();
+
 
 		// creating a second object; reset the model to apply different translate and scale to position
 		// these will be later handled by an object class
@@ -161,6 +174,7 @@ int main() {
 		model = glm::translate(model, glm::vec3(0.0f, 0.6f, -2.5f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		dirtTexture.UseTexture();
 		meshList2[1]->RenderMesh();
 
 		// close the shader

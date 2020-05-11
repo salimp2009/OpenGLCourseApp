@@ -31,7 +31,6 @@ int MyWindow::Initialise()
 	if (!mainWindow)
 	{
 		printf("GLFW Window creation failed!!!...");
-		//std::cout << "GLFW Window creation failed!!!...\n";
 		glfwTerminate();
 		return 1;
 	}
@@ -67,8 +66,10 @@ int MyWindow::Initialise()
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
 	glfwSetWindowUserPointer(mainWindow, this);			// to pass the current window to GLFW, 
-														// first parameter is pointer to mainWindow of active object 
-}													    // the second parameter sets the window is specific to this object
+														// first parameter is pointer to mainWindow of active object
+														// the second parameter sets the window is specific to this object
+	return 1; // not in the lectures but return value is int if we leave with nothing debug will give warning or change the return value to void or std::optional<int>
+}													    
 
 void MyWindow::createCallbacks()
 {
@@ -99,7 +100,7 @@ void MyWindow::handleKeys(GLFWwindow* window, int key, int code, int action, int
 																					// that was set in glfwSetWindowUserPointer() function; which assigns the current window object as the mainWindow  
 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)	 // if the user Presses ecape key and the stored values of the enums for escape key & release  action will be returned 
-	{												 // and the function will become true and the window will be closed
+	{													 // and the function will become true and the window will be closed
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
@@ -113,27 +114,27 @@ void MyWindow::handleKeys(GLFWwindow* window, int key, int code, int action, int
 		else if (action == GLFW_RELEASE)
 		{
 			theWindow->keys[key] = false;
-			printf("Released: %d\n", key);
+			// printf("Released: %d\n", key);		// for debugging only; disable or remove
 		}
 	}
 }
 
-void MyWindow::handleMouse(GLFWwindow* window, double xPos, double yPos)
+void MyWindow::handleMouse(GLFWwindow* window, double xPos, double yPos)	// better to change xPos and yPos instead of casting in the function
 {
 	MyWindow* theWindow = static_cast<MyWindow*>(glfwGetWindowUserPointer(window));
 
 	if (theWindow->mouseFirstMoved)
 	{
-		theWindow->lastX = xPos;
-		theWindow->lastY = yPos;
+		theWindow->lastX = (float)xPos;				// casted to float better to change funct defition to float
+		theWindow->lastY = (float)yPos;			    // casted to float better to change funct defition to float
 		theWindow->mouseFirstMoved = false;
 	}
 
-	theWindow->xChange = xPos - theWindow->lastX;
-	theWindow->yChange = theWindow->lastY - yPos;
+	theWindow->xChange = (float)xPos - theWindow->lastX;     // xPos casted to float
+	theWindow->yChange = theWindow->lastY - (float)yPos;	 // yPos casted to float
 
-	theWindow->lastX = xPos;
-	theWindow->lastY = yPos;
+	theWindow->lastX = (float)xPos;
+	theWindow->lastY = (float)yPos;
 
 	// used to check the mouse control is working; can be deleted
 	 //printf("x:%.6f, y:%.6f\n",theWindow->xChange, theWindow->yChange);
