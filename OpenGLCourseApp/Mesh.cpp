@@ -29,14 +29,16 @@ void Mesh::CreateMesh(GLfloat* vertices, unsigned int* indices, unsigned int num
 																				// next we pass the the data as a pointer which we use the array name
 																				// next we identify whether we will change any of those data or not; 
 																				// GL_STATIC_DRAW means no change later; GL_DYNAMIC draw means there will be change  
-	// creating Vertext Attribute Pointer that will be used in the shader
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof (vertices[0])*5, 0);						// first value is the location to start store the data in shader
+	
+	// creating Vertext Attribute Pointer for vertices that will be used in the shader
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof (vertices[0])*5, 0);	// first value is the location to start store the data in shader
 																				// second value is number of each data; x,y,z so it is 3 and second value is the type of data(Float here)
 																				// third value ; normalize the values or not;
 																				// fourth value is stride; if we position and color info and want to pass position only then we specify how many data to pass
 																				// fifth is offset where we want the data to start typically 0 but if you want to start from 2nd raw then we could pass 1			
 	glEnableVertexAttribArray(0);												// the value is the same value above first value
 	
+	// creating Vertext Attribute Pointer for textures that will be used in the shader
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]) * 5, (void*)(sizeof(vertices[0])*3)); // this one is for the texture coordinates in mesh array defined in vertices
 	glEnableVertexAttribArray(1); // this can be in RenderMesh() function
 
