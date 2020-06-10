@@ -18,8 +18,8 @@ void Texture::LoadTexture()
 	glGenTextures(1, &textureID);				// textureID is the variable where the buffer location for the texture given by OpenGL; similar to VAO..
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);  // wrap on the x axis if we go over the border
-	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  // wrap on the y axis if we go over the border
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);		// wrap on the x axis if we go over the border
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);		// wrap on the y axis if we go over the border
 	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

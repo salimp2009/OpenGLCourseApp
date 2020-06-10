@@ -35,10 +35,10 @@ private:
 	GLint bufferWidth, bufferHeight;
 	
 	// input from keyboard, mouse to pass it GLFW for the camera movement
-	bool keys[1024];			//1024 is to cover all the ASCII code; use max_key
-								//when a key is pressed down GLFW will pick it up and
-								//that number will refer to the index no in the keys array and value
-								//be set to TRUE and when the key is released when we lift off the key
+	bool keys[1024];			// 1024 is to cover all the ASCII code; use max_key
+								// when a key is pressed down GLFW will pick it up and
+								// that number will refer to the index no in the keys array and value
+								// be set to TRUE and when the key is released when we lift off the key
 								// this is specific GLFW to do a call back and static is used to make it to specific to a class
 	
 	// mouse input control values; last coordinates recorded

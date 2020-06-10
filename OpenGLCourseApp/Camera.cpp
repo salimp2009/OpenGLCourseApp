@@ -64,7 +64,7 @@ void Camera::update()
 { 
 	// direction vector
 	front.x = std::cos(glm::radians(yaw)) * std::cos(glm::radians(pitch));	
-	front.y = std::sin(glm::radians(pitch));								// check if roll can be used here if added
+	front.y = std::sin(glm::radians(pitch));								// TODO: check if roll can be used here if added
 	front.z = std::sin(glm::radians(yaw)) * std::sin(glm::radians(pitch));
 	front	= glm::normalize(front);										// normalize will divide by the length of vector giving a unit direction vector		
 

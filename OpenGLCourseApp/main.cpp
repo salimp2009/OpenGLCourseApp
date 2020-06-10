@@ -22,6 +22,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "Light.h"
 
 
 constexpr float toRadians = 3.14159265f / 180.0f;
@@ -35,6 +36,8 @@ Camera camera;
 
 Texture brickTexture;							// typicall in mesh class in the Render function; will be cleanedup later
 Texture dirtTexture;
+
+Light mainLight;
 
 GLfloat deltaTime{0.0f};						// deltaTime is in seconds
 GLfloat lastTime{0.0f};
@@ -120,9 +123,14 @@ int main() {
 	dirtTexture = Texture((char*)"Textures/dirt.png");
 	dirtTexture.LoadTexture();
 
+	mainLight = Light(1.0f, 1.0f, 1.0f, 0.8f);
+
+
 	GLuint uniformView{0};
 	GLuint uniformProjection{0};
 	GLuint uniformModel{0};
+	GLuint uniformAmbientIntensity{ 0 };
+	GLuint uniformAmbientColour{ 0 };
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), mainWindow.getBufferWidth()/mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
@@ -150,6 +158,10 @@ int main() {
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
 		uniformView = shaderList[0].GetViewLocation();
+		uniformAmbientColour = shaderList[0].GetAmbientColourLocation();
+		uniformAmbientIntensity = shaderList[0].GetAmbientIntensityLocation();
+
+		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour);
 
 		glm::mat4 model(1.0f);
 		

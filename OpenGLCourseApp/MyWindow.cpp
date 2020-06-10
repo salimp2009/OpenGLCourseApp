@@ -109,7 +109,7 @@ void MyWindow::handleKeys(GLFWwindow* window, int key, int code, int action, int
 		if (action == GLFW_PRESS)
 		{
 			theWindow->keys[key] = true;
-			printf("Pressed: %d\n", key);
+			printf("Pressed: %d\n", key);			// for debugging only; disable or remove
 		}
 		else if (action == GLFW_RELEASE)
 		{
